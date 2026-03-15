@@ -184,37 +184,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOWNLOAD FUNCTIONALITY ---
     downloadBtn.addEventListener('click', () => {
-        // Set a temporary transparent background for the container
-        previewContainer.style.backgroundColor = 'transparent';
-        preview.style.textShadow = 'none'; // Hide shadow for capture
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
 
-        setTimeout(() => {
-            html2canvas(previewContainer, { 
-                backgroundColor: null, // Use null for transparency
-                scale: 3, 
-                useCORS: true, 
-                logging: false 
-            })
-            .then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'custom-topper-design.png';
-                link.href = canvas.toDataURL('image/png');
-                document.body.appendChild(link); 
-                link.click(); 
-                document.body.removeChild(link);
+        // Wait for all fonts to be loaded
+        document.fonts.ready.then(() => {
+            // Set a temporary transparent background for the container
+            previewContainer.style.backgroundColor = 'transparent';
+            preview.style.textShadow = 'none'; // Hide shadow for capture
 
-                // Restore original styles
-                previewContainer.style.backgroundColor = ''; // Revert to original
-                preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
+            setTimeout(() => {
+                html2canvas(previewContainer, { 
+                    backgroundColor: null, // Use null for transparency
+                    scale: 3, 
+                    useCORS: true, 
+                    logging: true // Enable logging for debugging
+                })
+                .then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'custom-topper-design.png';
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link); 
+                    link.click(); 
+                    document.body.removeChild(link);
 
-            }).catch(err => {
-                console.error("Oops, something went wrong!", err);
+                    // Restore original styles and button state
+                    previewContainer.style.backgroundColor = ''; 
+                    preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
 
-                // Restore original styles even if there is an error
-                previewContainer.style.backgroundColor = '';
-                preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
-            });
-        }, 100);
+                }).catch(err => {
+                    console.error("Oops, something went wrong!", err);
+                    alert("Error generating image. Please check the console for details.");
+
+                    // Restore original styles and button state
+                    previewContainer.style.backgroundColor = '';
+                    preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
+                });
+            }, 100); // Small delay to ensure styles are applied
+        });
     });
 
 
