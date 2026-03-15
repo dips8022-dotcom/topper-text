@@ -187,16 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
     new ResizeObserver(updateDecorations).observe(preview);
     window.addEventListener('resize', updateDecorations);
 
-    // --- DOWNLOAD FUNCTIONALITY ---
+    // --- DOWNLOAD FUNCTIONALITY (NOW A POPUP) ---
     downloadBtn.addEventListener('click', () => {
         downloadBtn.disabled = true;
-        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
         const originalColor = preview.style.color;
         const originalBackground = preview.style.background;
         const originalWebkitBackgroundClip = preview.style.webkitBackgroundClip;
         const originalBackgroundClip = preview.style.backgroundClip;
-
+        
         preview.style.color = '#000000';
         preview.style.background = 'none';
         preview.style.webkitBackgroundClip = 'auto';
@@ -209,17 +209,16 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 html2canvas(previewContainer, { 
                     backgroundColor: null,
-                    scale: 3, 
+                    scale: 2, // Adjusted scale for better performance
                     useCORS: true, 
                     logging: true
                 })
                 .then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = 'custom-topper-design.png';
-                    link.href = canvas.toDataURL('image/png');
-                    document.body.appendChild(link); 
-                    link.click(); 
-                    document.body.removeChild(link);
+                    const imagePopup = document.getElementById('image-popup');
+                    const popupImage = document.getElementById('popup-image');
+                    
+                    popupImage.src = canvas.toDataURL('image/png');
+                    imagePopup.style.display = 'flex';
 
                 }).catch(err => {
                     console.error("Oops, something went wrong!", err);
@@ -229,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     previewContainer.style.backgroundColor = ''; 
                     preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
                     downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
+                    downloadBtn.innerHTML = '<i class="fas fa-eye"></i> Show Image'; // Changed button text
                     
                     preview.style.color = originalColor;
                     preview.style.background = originalBackground;
@@ -240,7 +239,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- POPUP CLOSE LOGIC ---
+    const imagePopup = document.getElementById('image-popup');
+    imagePopup.addEventListener('click', (e) => {
+        if (e.target.id === 'image-popup' || e.target.classList.contains('close-btn')) {
+            imagePopup.style.display = 'none';
+        }
+    });
 
     // --- INITIAL LOAD ---
     updatePreview();
+    // Change button text on initial load
+    downloadBtn.innerHTML = '<i class="fas fa-eye"></i> Show Image';
 });
