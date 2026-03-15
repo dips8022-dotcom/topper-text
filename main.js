@@ -4,9 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewContainer = document.getElementById('preview-container');
     const preview = document.getElementById('preview');
     const downloadBtn = document.getElementById('download-btn');
-    
+
     // Text style controls
     const fontSelector = document.getElementById('font-selector');
+    const fontSizeSlider = document.getElementById('font-size-slider');
+    const fontSizeValue = document.getElementById('font-size-value');
     const fontWeightSlider = document.getElementById('font-weight-slider');
     const fontWeightValue = document.getElementById('font-weight-value');
     const letterSpacingSlider = document.getElementById('letter-spacing-slider');
@@ -32,8 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DATA SETS ---
     const fontMap = {
         'east-sea-dokdo': "'East Sea Dokdo', cursive",
-        'nanum-myeongjo': "'Nanum Myeongjo', serif", 'nanum-gothic': "'Nanum Gothic', sans-serif",
-        'do-hyeon': "'Do Hyeon', sans-serif", 'gaegu': "'Gaegu', cursive", 'dokdo': "'Dokdo', cursive"
+        'nanum-myeongjo': "'Nanum Myeongjo', serif",
+        'nanum-gothic': "'Nanum Gothic', sans-serif",
+        'do-hyeon': "'Do Hyeon', sans-serif",
+        'gaegu': "'Gaegu', cursive",
+        'dokdo': "'Dokdo', cursive"
     };
     const variableWeightFonts = ['nanum-myeongjo', 'nanum-gothic', 'gaegu'];
     const decorationSets = {
@@ -75,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = textInput.value;
         const selectedFontKey = fontSelector.value;
         const selectedFontFamily = fontMap[selectedFontKey];
+        const fontSize = fontSizeSlider.value;
         const fontWeight = fontWeightSlider.value;
         const letterSpacing = letterSpacingSlider.value;
         const lineHeight = lineHeightSlider.value;
@@ -85,17 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         preview.innerHTML = text.replace(/\n/g, '<br>');
         preview.style.fontFamily = selectedFontFamily;
+        preview.style.fontSize = `${fontSize}px`;
         preview.style.fontWeight = supportsVariableWeight ? fontWeight : 'normal';
         preview.style.letterSpacing = `${letterSpacing}px`;
         preview.style.lineHeight = lineHeight / 100;
 
+        fontSizeValue.textContent = `${fontSize}px`;
         fontWeightValue.textContent = supportsVariableWeight ? fontWeight : 'N/A';
         letterSpacingValue.textContent = `${letterSpacing}px`;
         lineHeightValue.textContent = (lineHeight / 100).toFixed(1);
 
         updateColor();
-        // Temporarily disable decorations to debug download issue
-        // setTimeout(updateDecorations, 0);
+        setTimeout(updateDecorations, 0);
     }
 
     function updateColor() {
@@ -128,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (textRect.width === 0) return; // Don't draw if there's no text
 
-        // Helper function to create and position a single decoration
         const applyDecoration = (theme, checkboxes) => {
             if (theme === 'none' || !decorationSets[theme]) return;
             const decoSet = decorationSets[theme];
@@ -169,23 +175,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- EVENT LISTENERS ---
-    const allControls = [textInput, fontSelector, fontWeightSlider, letterSpacingSlider, lineHeightSlider];
+    const allControls = [textInput, fontSelector, fontSizeSlider, fontWeightSlider, letterSpacingSlider, lineHeightSlider];
     allControls.forEach(control => control.addEventListener('input', updatePreview));
     
     const colorControls = [colorTypeSelector, solidColorPicker, gradientStartPicker, gradientEndPicker];
     colorControls.forEach(control => control.addEventListener('input', updateColor));
 
-    // Temporarily disable decorations to debug download issue
-    // const decoControls = [topDecorationSelector, bottomDecorationSelector, ...topPositionCheckboxes, ...bottomPositionCheckboxes];
-    // decoControls.forEach(control => control.addEventListener('input', updateDecorations));
+    const decoControls = [topDecorationSelector, bottomDecorationSelector, ...topPositionCheckboxes, ...bottomPositionCheckboxes];
+    decoControls.forEach(control => control.addEventListener('input', updateDecorations));
 
-    // new ResizeObserver(updateDecorations).observe(preview);
-    // window.addEventListener('resize', updateDecorations); // Also handle window resize
+    new ResizeObserver(updateDecorations).observe(preview);
+    window.addEventListener('resize', updateDecorations);
 
     // --- DOWNLOAD FUNCTIONALITY ---
     downloadBtn.addEventListener('click', () => {
         downloadBtn.disabled = true;
         downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+
+        const originalColor = preview.style.color;
+        const originalBackground = preview.style.background;
+        const originalWebkitBackgroundClip = preview.style.webkitBackgroundClip;
+        const originalBackgroundClip = preview.style.backgroundClip;
+
+        preview.style.color = '#000000';
+        preview.style.background = 'none';
+        preview.style.webkitBackgroundClip = 'auto';
+        preview.style.backgroundClip = 'auto';
 
         document.fonts.ready.then(() => {
             previewContainer.style.backgroundColor = 'transparent';
@@ -206,19 +221,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     link.click(); 
                     document.body.removeChild(link);
 
-                    previewContainer.style.backgroundColor = ''; 
-                    preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
-
                 }).catch(err => {
                     console.error("Oops, something went wrong!", err);
                     alert("Error generating image. Please check the console for details.");
 
-                    previewContainer.style.backgroundColor = '';
+                }).finally(() => {
+                    previewContainer.style.backgroundColor = ''; 
                     preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
                     downloadBtn.disabled = false;
                     downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
+                    
+                    preview.style.color = originalColor;
+                    preview.style.background = originalBackground;
+                    preview.style.webkitBackgroundClip = originalWebkitBackgroundClip;
+                    preview.style.backgroundClip = originalBackgroundClip;
                 });
             }, 100);
         });
