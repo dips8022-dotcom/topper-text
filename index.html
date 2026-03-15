@@ -1,14 +1,126 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topper Text Image Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@100..900&family=Nanum+Myeongjo:wght@400;700;800&family=Do+Hyeon&family=Gaegu:wght@300;400;700&family=Dokdo&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2102@1.0/Ownglyph_Ui-yeon-chae_v1.0.woff" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoVBL5gI9kDXDCyBur1fAOcy+IaRfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <div class="app-container">
+        <!-- Controls Panel (Left Side) -->
+        <div class="controls-panel">
+            <div class="panel-header">
+                <h1>Topper Text Generator</h1>
+                <p>Create your custom topper text image.</p>
+            </div>
+
+            <textarea id="text-input" placeholder="여기에 텍스트를 입력하세요..." rows="3">Happy Birthday</textarea>
+
+            <div class="controls-container">
+                <!-- Font & Text Controls -->
+                <div class="control-group">
+                    <h3><i class="fas fa-font"></i> Text Style</h3>
+                    <div class="control">
+                        <label for="font-selector">글씨체 (Font)</label>
+                        <div class="select-wrapper"><select id="font-selector"><option value="ui-yeon">의연체</option><option value="nanum-myeongjo">나눔명조</option><option value="nanum-gothic">나눔고딕</option><option value="do-hyeon">도현</option><option value="gaegu">개구</option><option value="dokdo">독도</option></select></div>
+                    </div>
+                    <div class="control">
+                        <label for="font-weight-slider">글자 굵기 (Weight)</label>
+                        <div class="slider-wrapper"><input type="range" id="font-weight-slider" min="100" max="900" step="100" value="400"><span id="font-weight-value">400</span></div>
+                    </div>
+                    <div class="control">
+                        <label for="letter-spacing-slider">자간 (Spacing)</label>
+                        <div class="slider-wrapper"><input type="range" id="letter-spacing-slider" min="-10" max="30" value="1"><span id="letter-spacing-value">1px</span></div>
+                    </div>
+                    <div class="control">
+                        <label for="line-height-slider">행간 (Height)</label>
+                        <div class="slider-wrapper"><input type="range" id="line-height-slider" min="80" max="200" value="140"><span id="line-height-value">1.4</span></div>
+                    </div>
+                </div>
+
+                <!-- Color Controls -->
+                <div class="control-group">
+                    <h3><i class="fas fa-palette"></i> Text Color</h3>
+                    <div class="control">
+                        <label for="color-type-selector">색상 종류 (Type)</label>
+                        <div class="select-wrapper"><select id="color-type-selector"><option value="solid">단색</option><option value="gradient">그라디언트</option><option value="gold">금색</option><option value="silver">은색</option></select></div>
+                    </div>
+                    <div class="control" id="solid-color-control">
+                        <label for="solid-color-picker">단색</label>
+                        <input type="color" id="solid-color-picker" value="#34495e">
+                    </div>
+                    <div class="control" id="gradient-color-controls" style="display: none;">
+                        <label>그라디언트 색상</label>
+                        <div class="gradient-pickers"><input type="color" id="gradient-start-picker" value="#ff7675"><input type="color" id="gradient-end-picker" value="#d63031"></div>
+                    </div>
+                </div>
+
+                <!-- Decoration Controls -->
+                <div class="control-group" id="decoration-controls">
+                    <h3><i class="fas fa-spa"></i> Decorations</h3>
+                    <div class="sub-group">
+                        <label for="top-decoration-selector">상단 장식 (Top)</label>
+                        <div class="select-wrapper">
+                            <select id="top-decoration-selector">
+                                <option value="none">없음</option>
+                                <option value="cherry-blossom">벚꽃</option>
+                                <option value="line-rose">미니멀 라인 장미</option>
+                                <option value="watercolor-rose">수채화 장미</option>
+                                <option value="sunflower">해바라기</option>
+                                <option value="lavender">라벤더</option>
+                                <option value="daisy">데이지</option>
+                                <option value="scattered-hearts">하트 흩뿌리기</option>
+                                <option value="sparkles">반짝이</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group" id="top-deco-positions">
+                            <div class="checkbox-control"><input type="checkbox" id="deco-top-left" value="top-left"><label for="deco-top-left">좌</label></div>
+                            <div class="checkbox-control"><input type="checkbox" id="deco-top-center" value="top-center"><label for="deco-top-center">중</label></div>
+                            <div class="checkbox-control"><input type="checkbox" id="deco-top-right" value="top-right"><label for="deco-top-right">우</label></div>
+                        </div>
+                    </div>
+                    <div class="sub-group">
+                        <label for="bottom-decoration-selector">하단 장식 (Bottom)</label>
+                        <div class="select-wrapper">
+                            <select id="bottom-decoration-selector">
+                               <option value="none">없음</option>
+                                <option value="cherry-blossom">벚꽃</option>
+                                <option value="line-rose">미니멀 라인 장미</option>
+                                <option value="watercolor-rose">수채화 장미</option>
+                                <option value="sunflower">해바라기</option>
+                                <option value="lavender">라벤더</option>
+                                <option value="daisy">데이지</option>
+                                <option value="scattered-hearts">하트 흩뿌리기</option>
+                                <option value="sparkles">반짝이</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group" id="bottom-deco-positions">
+                            <div class="checkbox-control"><input type="checkbox" id="deco-bottom-left" value="bottom-left"><label for="deco-bottom-left">좌</label></div>
+                            <div class="checkbox-control"><input type="checkbox" id="deco-bottom-center" value="bottom-center"><label for="deco-bottom-center">중</label></div>
+                            <div class="checkbox-control"><input type="checkbox" id="deco-bottom-right" value="bottom-right"><label for="deco-bottom-right">우</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="download-btn"><i class="fas fa-download"></i> Download Image</button>
+        </div>
+
+        <!-- Preview Panel (Right Side) -->
+        <div class="preview-panel">
+            <div id="preview-container">
+                <div id="decoration-container"></div>
+                <div id="preview">Happy Birthday</div>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
 </body>
 </html>
