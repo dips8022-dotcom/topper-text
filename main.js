@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATA SETS ---
     const fontMap = {
-        'ui-yeon': "'Ownglyph_Ui-yeon-chae_v1.0', sans-serif",
+        'east-sea-dokdo': "'East Sea Dokdo', cursive",
         'nanum-myeongjo': "'Nanum Myeongjo', serif", 'nanum-gothic': "'Nanum Gothic', sans-serif",
         'do-hyeon': "'Do Hyeon', sans-serif", 'gaegu': "'Gaegu', cursive", 'dokdo': "'Dokdo', cursive"
     };
@@ -94,8 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lineHeightValue.textContent = (lineHeight / 100).toFixed(1);
 
         updateColor();
-        // Use a timeout to ensure the DOM is updated and textRect is calculated correctly
-        setTimeout(updateDecorations, 0);
+        // Temporarily disable decorations to debug download issue
+        // setTimeout(updateDecorations, 0);
     }
 
     function updateColor() {
@@ -141,12 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.className = 'decoration-item';
                 item.innerHTML = decoSet[Math.floor(Math.random() * decoSet.length)];
                 
-                // Let's use the SVG's intrinsic size for more varied looks
                 const svgEl = item.querySelector('svg');
                 const svgWidth = svgEl ? parseFloat(svgEl.getAttribute('width')) : 60;
                 const svgHeight = svgEl ? parseFloat(svgEl.getAttribute('height')) : 60;
 
-                const scale = 0.8; // Scale all SVGs down a bit to fit nicely
+                const scale = 0.8;
                 const w = svgWidth * scale;
                 const h = svgHeight * scale;
 
@@ -176,29 +175,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const colorControls = [colorTypeSelector, solidColorPicker, gradientStartPicker, gradientEndPicker];
     colorControls.forEach(control => control.addEventListener('input', updateColor));
 
-    const decoControls = [topDecorationSelector, bottomDecorationSelector, ...topPositionCheckboxes, ...bottomPositionCheckboxes];
-    decoControls.forEach(control => control.addEventListener('input', updateDecorations));
+    // Temporarily disable decorations to debug download issue
+    // const decoControls = [topDecorationSelector, bottomDecorationSelector, ...topPositionCheckboxes, ...bottomPositionCheckboxes];
+    // decoControls.forEach(control => control.addEventListener('input', updateDecorations));
 
-    new ResizeObserver(updateDecorations).observe(preview);
-    window.addEventListener('resize', updateDecorations); // Also handle window resize
+    // new ResizeObserver(updateDecorations).observe(preview);
+    // window.addEventListener('resize', updateDecorations); // Also handle window resize
 
     // --- DOWNLOAD FUNCTIONALITY ---
     downloadBtn.addEventListener('click', () => {
         downloadBtn.disabled = true;
         downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
 
-        // Wait for all fonts to be loaded
         document.fonts.ready.then(() => {
-            // Set a temporary transparent background for the container
             previewContainer.style.backgroundColor = 'transparent';
-            preview.style.textShadow = 'none'; // Hide shadow for capture
+            preview.style.textShadow = 'none';
 
             setTimeout(() => {
                 html2canvas(previewContainer, { 
-                    backgroundColor: null, // Use null for transparency
+                    backgroundColor: null,
                     scale: 3, 
                     useCORS: true, 
-                    logging: true // Enable logging for debugging
+                    logging: true
                 })
                 .then(canvas => {
                     const link = document.createElement('a');
@@ -208,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     link.click(); 
                     document.body.removeChild(link);
 
-                    // Restore original styles and button state
                     previewContainer.style.backgroundColor = ''; 
                     preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
                     downloadBtn.disabled = false;
@@ -218,13 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Oops, something went wrong!", err);
                     alert("Error generating image. Please check the console for details.");
 
-                    // Restore original styles and button state
                     previewContainer.style.backgroundColor = '';
                     preview.style.textShadow = '1px 1px 2px rgba(0,0,0,0.05)';
                     downloadBtn.disabled = false;
                     downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Image';
                 });
-            }, 100); // Small delay to ensure styles are applied
+            }, 100);
         });
     });
 
